@@ -1,12 +1,12 @@
 // Some JavaScript to load the image and show the form. There is no actual backend functionality. This is just the UI
 
-const form = document.querySelector('#img-form');
+const form = document.querySelector('#current-file');
 
-function loadImage(e) {
+function loadExcel(e) {
   const file = e.target.files[0];
 
-  if (!isFileImage(file)) {
-      alert('Please select an image file');
+  if (!isFileXlsx(file)) {
+      alert('Please select an .xlsx file');
         return;
   }
 
@@ -16,9 +16,9 @@ function loadImage(e) {
   ).innerHTML = file.name;
 }
 
-function isFileImage(file) {
-    const acceptedImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
-    return file && acceptedImageTypes.includes(file['type'])
+function isFileXlsx(file) {
+  const acceptedXlsxType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  return file && file['type'] === acceptedXlsxType;
 }
 
-document.querySelector('#img').addEventListener('change', loadImage);
+document.querySelector('#xlsx').addEventListener('change', loadExcel);
