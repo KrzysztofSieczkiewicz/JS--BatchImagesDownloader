@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>File Selection Example</title>
+  </head>
+  <body>
+    <button id="openFile">Open File</button>
+    <button id="openDirectory">Open Directory</button>
+    <script>
+      const { ipcRenderer } = require('electron');
+
+      document.getElementById('openFile').addEventListener('click', () => {
+        ipcRenderer.send('open-file-dialog');
+      });
+
+      document.getElementById('openDirectory').addEventListener('click', () => {
+        ipcRenderer.send('open-directory-dialog');
+      });
+    </script>
+  </body>
+</html>
