@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/renderer.js" defer></script>
+    <title>Batch Image Downloader</title>
+  </head>
+  <body>
+    <div class="form-container">
+      <section class="file-button">
+        <div class="file-selector">
+          <img src="./images/logo.svg" width="32" />
+          <span class="file-selector-label">Select .xlsx file to process</span>
+          <input id="img" type="file" class="hidden" />
+        </div>
+      </section>
+
+      <section class="current-file">
+        <span class="current-file-data">
+          <p class="current-file-name">file name</p>
+          <p class="current-file-path">C://path</p>
+        </span>
+      </section>
+    </div>
+    
+  </body>
+</html>
