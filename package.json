@@ -27,6 +27,14 @@
     "appId": "com.sieczkik.batchimagesdownloader",
     "win": {
       "target": "nsis"
-    }
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": false,
+      "shortcutName": "ImgDownloader"
+    },
+    "productName": "ImagesDownloader"
   }
 }
