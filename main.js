@@ -10,7 +10,8 @@ const isMac = process.platform === 'darwin';
 function createMainWindow() {
     const mainWindow = new BrowserWindow({
       title: 'Batch image downloader',
-      width: isDev ? 1000 : 500,
+      //width: isDev ? 1000 : 500,
+      width: 500,
       height: 720,
       webPreferences: {
         preload: path.join(__dirname, 'preload.js'),
@@ -19,27 +20,14 @@ function createMainWindow() {
       }
     });
 
-  const appMenu = Menu.buildFromTemplate(menu);
-  mainWindow.setMenu(appMenu);
-
+  mainWindow.setMenu( null );
+/*
     // Open devtools if in dev env
     if(isDev) {
       mainWindow.webContents.openDevTools();
     }
-
+*/
     mainWindow.loadFile(path.join(__dirname, './renderer/index.html'));
-}
-
-function createHelpWindow() {
-  const helpWindow = new BrowserWindow({
-    title: 'How to use?',
-    width: 600,
-    height: 300,
-  });
-
-  helpWindow.setMenu(null);
-
-  helpWindow.loadFile(path.join(__dirname, './renderer/help.html'));
 }
 
 app.whenReady().then( () => {
@@ -71,20 +59,6 @@ app.on('ready', () => {
     })
   })
 })
-
-// Top bar menu template
-const menu = [
-  {
-    label: 'Help',
-    submenu: [
-      {
-        label: 'How to?',
-        click: () => createHelpWindow(),
-        accelerator: 'CmdOrCtrl+H'
-      }
-    ]
-  }
-]
 
 //// FUNCTIONS TO HANDLE DATA DOWNLOAD
 let xlsxMap;
@@ -125,14 +99,11 @@ async function downloadFromMap(urlsMap) {
       };
 
       try {
-        const { filename } = await download.image(options);
-        console.log('Image ' + filename + ' saved');
-        
+        await download.image(options);
         successNo += 1;
       } catch (e) {
+        if (!failed.includes(mapKey)) failed.push(mapKey);
         errorNo += 1;
-        failed.push(mapKey);
-        console.error(`Failed to download image ${valueArray[i]}, for product: ${mapKey}. ${e.message}`);
       }
     }
   }
