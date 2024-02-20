@@ -40,7 +40,7 @@ function getFile(e) {
   xlsxFilePath.classList.remove('hidden');
 
   processingStatus.innerHTML = "Ready for processing"
-  downloadStatus.innerHTML = "Waiting for processing"
+  downloadStatus.innerHTML = "Load a file"
 }
 
 function isXlsx(file) {
@@ -78,13 +78,17 @@ const defaultProcessingRowsNo = processingRowsNo.innerHTML;
 const defaultProcessingCellsNo = processingCellsNo.innerHTML;
 
 let isFileLoaded = false;
+let isFileLoading = false;
 let downloadsMap;
 
 function readXlsx() {
+  if (isFileLoading) return;
   if (!isFileSelected) {
     alert('Please load .xlsx file first');
     return;
   }
+  isFileLoading = true;
+  processFileButton.disabled = true;
 
   var reader = new FileReader();
   let totalRows =  0;
@@ -98,6 +102,7 @@ function readXlsx() {
     isFileLoaded = false;
 
     processFileButton.innerHTML = "Loading..."
+    downloadStatus.innerHTML = "Waiting for processing"
     processingStatus.innerHTML = "Started processing";
   };
   // INFORM ABOUT PROGRESS:
@@ -131,6 +136,8 @@ function readXlsx() {
         rowDataMap.set(key, values);
       });
     });
+    // REMOVE FIRST ROW TO SKIP HEADERS
+    rowDataMap.delete(rowDataMap.keys().next().value);
 
     // SAVE MAP AND SEND IT TO MAIN.JS
     downloadsMap = rowDataMap;
@@ -144,9 +151,10 @@ function readXlsx() {
     processingCellsNoWrapper.classList.remove('hidden');
 
     downloadStatus.innerHTML = "Ready to download"
+    isFileLoaded = true;
+    isFileLoading = false;
+    processFileButton.disabled = false;
   }
-
-  isFileLoaded = true;
 
   reader.readAsArrayBuffer(processedFile);
 }
@@ -191,6 +199,7 @@ function startDownloading() {
     alert('Please process .xlsx file first');
     return;
   }
+  downloadButton.disabled = true;
 
   if (isDownloading) return;
   // TODO: ADD CHECK IF FILE HAS BEEN LOADED
@@ -198,6 +207,7 @@ function startDownloading() {
   resetDownloadingInfo();
 
   downloadButton.innerHTML = 'Downloading...';
+  downloadStatus.innerHTML = 'In progress...'
 
   window.electronAPI.send('download-toMain', true);
 }
@@ -223,6 +233,7 @@ function downloadingFinished(response) {
   }
 
   isDownloading = false;
+  downloadButton.disabled = false;
 }
 
 function resetDownloadingInfo() {

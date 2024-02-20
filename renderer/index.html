@@ -20,13 +20,13 @@
     <div class="form-container">
       
       <section id="file-button">
-        <div class="file-selector">
+        <div class="button-main">
           <!-- <img src="./images/logo.svg" width="32" /> -->
           <label class="file-selector-label" for="xlsx-file">Select .xlsx file to process</label>
           <input id="xlsx-file-input" type="file" name="xlsx-file"/>
         </div>
         <div id="current-file-data">
-          <span class="current-file">
+          <span class="section-details">
             <p id="input-file-name" class="current-file-name bold hidden">Filename</p>
             <p id="input-file-path" class="current-file-path hidden">Filepath</p>
           </span>
@@ -34,21 +34,21 @@
       </section>
 
       <section id="file-processing">
-        <button id="btn-file-process">Load</button>
-        <span class="file-details">
-          <p id="file-process-progress" class="bold">Select a file</p>
+        <button class="button-main btn-narrow" id="btn-file-process">Load</button>
+        <span class="section-details">
+          <p id="file-process-progress" class="bold">Waiting for a file</p>
           <p id="file-process-rows-wrap" class="hidden">Total rows detected: <span id="file-process-rows"></span></p>
           <p id="file-process-cells-wrap" class="hidden">Total images detected: <span id="file-process-cells"></span></p>
         </span>
       </section>
 
       <section id="download">
-        <button id="btn-download">Download</button>
-        <span class="download-details">
+        <button class="button-main btn-narrow" id="btn-download">Download</button>
+        <span class="section-details">
           <p id="download-progress" class="bold">Waiting for a file</p>
           <p id="download-success-no-wrap" class="hidden">Successfully downloaded: <span id="download-success-no"></span></p>
           <p id="download-fails-no-wrap" class="hidden">Failed to download: <span id="download-fails-no"></span></p>
-          <textarea class="hidden" id="download-fails-list"></textarea>
+          <textarea class="hidden" id="download-fails-list" readonly></textarea>
         </span>
       </section>
     </div>
