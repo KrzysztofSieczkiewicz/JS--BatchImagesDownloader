@@ -21,9 +21,9 @@
       
       <section id="file-button">
         <div class="file-selector">
-          <img src="./images/logo.svg" width="32" />
-          <span class="file-selector-label">Select .xlsx file to process</span>
-          <input id="xlsx-file-input" type="file" />
+          <!-- <img src="./images/logo.svg" width="32" /> -->
+          <label class="file-selector-label" for="xlsx-file">Select .xlsx file to process</label>
+          <input id="xlsx-file-input" type="file" name="xlsx-file"/>
         </div>
         <div id="current-file-data" style="display:none">
           <span class="current-file">
@@ -36,18 +36,19 @@
       <section id="file-processing">
         <button id="btn-file-process">Load</button>
         <span class="file-details">
-          <p id="file-process-progress"></p>
-          <p id="file-process-rows"></p>
-          <p id="file-process-cells"></p>
+          <p id="file-process-progress">Waiting to process</p>
+          <p>Total rows detected: <span id="file-process-rows"></span></p>
+          <p>Total images detected: <span id="file-process-cells"></span></p>
         </span>
       </section>
 
       <section id="download">
         <button id="btn-download">Download</button>
         <span class="download-details">
-          <p id="download-progress"></p>
-          <p id="download-rows"></p>
-          <p id="download-cells"></p>
+          <p id="download-progress">Ready to download</p>
+          <p>Successfully downloaded: <span id="download-success-no"></span></p>
+          <p>Failed to download: <span id="download-fails-no"></span></p>
+          <textarea id="download-fails-list"></textarea>
         </span>
       </section>
     </div>

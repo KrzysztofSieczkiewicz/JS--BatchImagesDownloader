@@ -1,25 +1,15 @@
-//TODO: REMOVE IMAGE-DOWNLOADER
-
-const xlsxFileInput = document.getElementById('xlsx-file-input');
+/*
+    XML FILE SELECTION
+*/
+const xlsxFileInput = document.querySelector('#xlsx-file-input');
 
 const xlsxDetails = document.querySelector('#current-file-data');
 const xlsxFileName = document.querySelector('#input-file-name');
 const xlsxFilePath = document.querySelector('#input-file-path');
 
-
-const processFileButton = document.querySelector('#btn-file-process');
-const processingStatus = document.querySelector('#file-process-progress');
-const processingRowsNo = document.querySelector('#file-process-rows');
-const processingCellsNo = document.querySelector('#file-process-cells');
-
-const downloadButton = document.querySelector('#btn-download');
-
 let processedFile;
-let downloadsMap;
 
-let isDownloading = false;
-
-function loadFile(e) {
+function getFile(e) {
   const file = e.target.files[0];
 
   // CHECK IF FILE IS OF PROPER FORMAT
@@ -27,6 +17,9 @@ function loadFile(e) {
     alert('Please select valid .xlsx file');
     return;
   }
+  resetFileInfo();
+  resetProcessingInfo();
+  resetDownloadingInfo();
 
   // SET FILE VAR
   processedFile = file;
@@ -37,11 +30,6 @@ function loadFile(e) {
   var lastSlashPosition = file.path.lastIndexOf('\\');
   var pathWithoutFileName = file.path.substring(0, lastSlashPosition);
   document.querySelector( '#input-file-path' ).innerHTML = pathWithoutFileName;
-
-  // CLEAR LOADING STATISTICS
-  processingStatus.innerHTML = "";
-  processingRowsNo.innerHTML = "";
-  processingCellsNo.innerHTML = "";
 }
 
 function isXlsx(file) {
@@ -49,27 +37,53 @@ function isXlsx(file) {
   return file && file['type'] === acceptedXlsxType;
 }
 
+function resetFileInfo() {
+  processingStatus.innerHTML = "";
+  processingRowsNo.innerHTML = "";
+  processingCellsNo.innerHTML = "";
+}
+
+// ADD EVENTLISTENERS
+xlsxFileInput.addEventListener('change', getFile);
+
+
+
+/*
+    XML FILE READING
+*/
+const processFileButton = document.querySelector('#btn-file-process');
+const processingStatus = document.querySelector('#file-process-progress');
+const processingRowsNo = document.querySelector('#file-process-rows');
+const processingCellsNo = document.querySelector('#file-process-cells');
+
+const defaultProcessingStatus = processingStatus.innerHTML;
+const defaultProcessingRowsNo = processingRowsNo.innerHTML;
+const defaultProcessingCellsNo = processingCellsNo.innerHTML;
+
+let downloadsMap;
 
 function readXlsx() {
+  if (!processedFile) {
+    alert('Please load .xlsx file first');
+    return;
+  }
   var reader = new FileReader();
   // required by excel
   let totalRows =  0;
   let totalCells =  0;
 
   // INFORM ABOUT LOADING INIT:
-  reader.onloadstart = function(event) {
+  reader.onloadstart = function() {
+    resetProcessingInfo();
+    resetDownloadingInfo();
     processingStatus.innerHTML = "Started processing";
-    processingRowsNo.innerHTML = "";
-    processingCellsNo.innerHTML = "";
   };
-
   // INFORM ABOUT PROGRESS:
   reader.onprogress = function(event) {
     if (event.lengthComputable) {
-      processingStatus.innerHTML = "Loading file";
+      processingStatus.innerHTML = "Loading file...";
     }
   };
-
   // LOAD
   reader.onload = async function(event) {
     const data = new Uint8Array(event.target.result);
@@ -96,73 +110,75 @@ function readXlsx() {
       });
     });
 
+    // SAVE MAP AND SEND IT TO MAIN.JS
     downloadsMap = rowDataMap;
+    window.electronAPI.send('map-toMain', rowDataMap);
 
     processingStatus.innerHTML = "File loaded:";
-    processingRowsNo.innerHTML = "Total rows detected: " + totalRows;
-    processingCellsNo.innerHTML = "Total images detected: " + totalCells;
+    processingRowsNo.innerHTML = totalRows;
+    processingCellsNo.innerHTML = totalCells;
   }
 
   reader.readAsArrayBuffer(processedFile);
 }
 
-
-async function downloadFromMap() {
-  if (isDownloading) {
-    console.log('Download is already in progress. Prevented execution');
-    return;
-  }
-  isDownloading = true;
-
-  console.log("Started downloading")
-
-  for (const [mapKey, valueArray] of downloadsMap.entries()) {
-    console.log("Opened Map")
-    for (let i =  0; i < valueArray.length; i++) {
-      console.log('Started row: ' + i)
-
-      console.log(valueArray[i])
-
-      const options = {
-        url: valueArray[i],
-        dest: `./images/${mapKey}_${i}.jpg`
-      };
-
-      try {
-        //const { filename } = await download.image(options);
-        ipcRenderer.send("download", {
-          url: valueArray[i],
-          properties: {directory: `./images/${mapKey}_${i}.jpg`}
-        });
-        console.log('Image ' + filename + ' saved');
-      } catch (e) {
-        console.error(`Failed to download image ${valueArray[i]}, for product: ${mapKey}. ${e.message}`);
-      }
-
-      console.log('Finished row: ' + i)
-    }
-  }
-
-  isDownloading = false;
+function resetProcessingInfo() {
+  processingStatus.innerHTML = defaultProcessingStatus;
+  processingRowsNo.innerHTML = defaultProcessingRowsNo;
+  processingCellsNo.innerHTML = defaultProcessingCellsNo;
 }
 
-
-xlsxFileInput.addEventListener('change', loadFile);
+// ADD EVENT LISTENER
 processFileButton.addEventListener('click', readXlsx);
 
-downloadButton.addEventListener('click', () => {
-  console.log("PRÓBUJĘ WYSŁAĆ")
-  window.electronAPI.send('map-toMain', downloadsMap);
-});
 
 
 /*
-document.getElementById('downloadButton').addEventListener('click', () => {
-  //window.api.downloadImages(downloadsMap);
-
-  ipcRenderer.send("download", {
-    url: "URL is here",
-    properties: {directory: "Directory is here"}
-  });
-});
+    IMAGES DOWNLOAD
 */
+const downloadButton = document.querySelector('#btn-download');
+const downloadStatus = document.querySelector('#download-progress');
+const downloadSuccessNo = document.querySelector('#download-success-no');
+const downloadFailsNo = document.querySelector('#download-fails-no');
+
+const defaultDownloadStatus = downloadStatus.innerHTML;
+const defaultDownloadSuccessNo = downloadSuccessNo.innerHTML;
+const defaultDownloadFailsNo = downloadFailsNo.innerHTML;
+
+function startDownloading() {
+  // TODO: ADD CHECK IF FILE HAS BEEN LOADED
+  resetDownloadingInfo();
+
+  downloadButton.innerHTML = 'Downloading...';
+
+  window.electronAPI.send('download-toMain', true);
+}
+
+function downloadingFinished(response) {
+  console.log(response);
+  
+  downloadButton.innerHTML = 'Download';
+  if (response[0] !== undefined) downloadStatus.innerHTML = response[0];
+  if (response[1] !== undefined) downloadSuccessNo.innerHTML = response[1];
+  if (response[2] !== undefined) downloadFailsNo.innerHTML = response[2];
+  if (response[3] !== undefined) console.log(response[3]); // TODO ADD FAILS LIST
+}
+
+function resetDownloadingInfo() {
+  downloadStatus.innerHTML = defaultDownloadStatus;
+  downloadSuccessNo.innerHTML = defaultDownloadSuccessNo;
+  downloadFailsNo.innerHTML = defaultDownloadFailsNo;
+}
+
+// ADD EVENT LISTENERS
+downloadButton.addEventListener( 'click', () => startDownloading() );
+
+window.addEventListener('message', (event) => {
+  if (event.data.channel === 'selected-directory') {
+    console.log('Selected directory:', event.data.path);
+  }
+});
+
+window.electronAPI.on('download-toRenderer', (response) => {
+  downloadingFinished(response); // This will log the response from the main process
+});
