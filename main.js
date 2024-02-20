@@ -1,16 +1,17 @@
 const path = require('path')
 const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const download = require('image-downloader');
+const os = require('os');
+const fs = require('fs');
 
 const isDev = process.env.NODE_ENV !== 'development'
 const isMac = process.platform === 'darwin';
-const isWindows = process.platform === 'win32';
-const isLinux = process.platform === 'linux';
 
 function createMainWindow() {
     const mainWindow = new BrowserWindow({
       title: 'Batch image downloader',
       width: isDev ? 1000 : 500,
-      height: 600,
+      height: 720,
       webPreferences: {
         preload: path.join(__dirname, 'preload.js'),
         contextIsolation: true,
@@ -59,9 +60,16 @@ app.whenReady().then( () => {
 
 app.on('ready', () => {
   ipcMain.on('map-toMain', (event, arg) => {
-      console.log('Received message on get-map:', arg);
-      // Handle the message
+    xlsxMap = arg;
   });
+
+  ipcMain.on('download-toMain', (event, arg) => {
+    const response = downloadFromMap(xlsxMap)
+
+    response.then( (data) => {
+      event.sender.send('download-toRenderer', data);
+    })
+  })
 })
 
 // Top bar menu template
@@ -77,3 +85,73 @@ const menu = [
     ]
   }
 ]
+
+//// FUNCTIONS TO HANDLE DATA DOWNLOAD
+let xlsxMap;
+let isDownloading = false;
+const illegalRe = /[/\\?%*:|"<>]/g;
+const homeDirectory = os.homedir();
+
+async function downloadFromMap(urlsMap) {
+  if (isDownloading) {
+    return;
+  }
+  isDownloading = true;
+
+  let failed = [];
+  let successNo = 0;
+  let errorNo = 0;
+
+  // CREATE FOLDER FOR IMAGES
+  const dateTime = getCurrentDateTime();
+  const folderName = 'imagesDownload_' + dateTime;
+  const dirDownloads = path.join(homeDirectory, 'Downloads');
+  const dirFinal = path.join(dirDownloads, folderName);
+
+  if (fs.existsSync(dirFinal)) {
+    dirFinal += '_2'
+  }
+  fs.mkdirSync(dirFinal);
+
+  // TODO: SEND BACK INFO ABOUT DOWNLOAD INIT
+
+  for (const [mapKey, valueArray] of urlsMap.entries()) {
+    for (let i =  0; i < valueArray.length; i++) {
+      const saveMapKey = mapKey.replace(illegalRe, '-');
+
+      const options = {
+        url: valueArray[i],
+        dest: `${dirFinal}/${saveMapKey}_${dateTime}_${i}.jpg`
+      };
+
+      try {
+        const { filename } = await download.image(options);
+        console.log('Image ' + filename + ' saved');
+        
+        successNo += 1;
+      } catch (e) {
+        errorNo += 1;
+        failed.push(mapKey);
+        console.error(`Failed to download image ${valueArray[i]}, for product: ${mapKey}. ${e.message}`);
+      }
+    }
+  }
+  isDownloading = false;
+  const message = "Downloading finished";
+
+  return [message, successNo, errorNo, failed];
+}
+
+
+
+function getCurrentDateTime() {
+  const date = new Date();
+
+  let day = String(date.getDate()).padStart(2, '0');
+  let month = String(date.getMonth() +  1).padStart(2, '0');
+  let year = date.getFullYear();
+  let hour = String(date.getHours()).padStart(2, '0');
+  let minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return year + "" + month + "" + day + '-' + hour + "" + minutes;
+}
