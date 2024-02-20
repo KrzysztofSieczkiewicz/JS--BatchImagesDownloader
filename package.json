@@ -11,9 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "electron": "^28.2.3",
+    "electron-download-manager": "^2.1.2",
     "exceljs": "^4.4.0",
     "fs-extra": "^11.2.0",
-    "image-downloader": "^4.3.0",
-    "electron": "^28.2.3"
+    "image-downloader": "^4.3.0"
   }
 }
