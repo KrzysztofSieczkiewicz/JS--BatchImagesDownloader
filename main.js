@@ -125,14 +125,11 @@ async function downloadFromMap(urlsMap) {
       };
 
       try {
-        const { filename } = await download.image(options);
-        console.log('Image ' + filename + ' saved');
-        
+        await download.image(options);
         successNo += 1;
       } catch (e) {
+        if (!failed.includes(mapKey)) failed.push(mapKey);
         errorNo += 1;
-        failed.push(mapKey);
-        console.error(`Failed to download image ${valueArray[i]}, for product: ${mapKey}. ${e.message}`);
       }
     }
   }

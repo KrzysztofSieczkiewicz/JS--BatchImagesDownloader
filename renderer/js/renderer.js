@@ -7,9 +7,14 @@ const xlsxDetails = document.querySelector('#current-file-data');
 const xlsxFileName = document.querySelector('#input-file-name');
 const xlsxFilePath = document.querySelector('#input-file-path');
 
+const defaultXlsxFileName = xlsxFileName.innerHTML;
+const defaultXlsxFilePath = xlsxFilePath.innerHTML;
+
 let processedFile;
+let isFileSelected = false;
 
 function getFile(e) {
+  isFileSelected = false;
   const file = e.target.files[0];
 
   // CHECK IF FILE IS OF PROPER FORMAT
@@ -23,13 +28,19 @@ function getFile(e) {
 
   // SET FILE VAR
   processedFile = file;
+  isFileSelected = true;
 
   // SET DESCRIPTION NAME AND PATH
-  xlsxDetails.style.display = 'block';
-  document.querySelector( '#input-file-name' ).innerHTML = 'File: ' + file.name;
+  xlsxFileName.innerHTML = 'File: ' + file.name;
+  xlsxFileName.classList.remove('hidden');
+
   var lastSlashPosition = file.path.lastIndexOf('\\');
   var pathWithoutFileName = file.path.substring(0, lastSlashPosition);
-  document.querySelector( '#input-file-path' ).innerHTML = pathWithoutFileName;
+  xlsxFilePath.innerHTML = pathWithoutFileName;
+  xlsxFilePath.classList.remove('hidden');
+
+  processingStatus.innerHTML = "Ready for processing"
+  downloadStatus.innerHTML = "Waiting for processing"
 }
 
 function isXlsx(file) {
@@ -38,9 +49,11 @@ function isXlsx(file) {
 }
 
 function resetFileInfo() {
-  processingStatus.innerHTML = "";
-  processingRowsNo.innerHTML = "";
-  processingCellsNo.innerHTML = "";
+  xlsxFileName.innerHTML = defaultXlsxFileName;
+  xlsxFileName.classList.add('hidden');
+
+  xlsxFilePath.innerHTML = defaultXlsxFilePath;
+  xlsxFilePath.classList.add('hidden');
 }
 
 // ADD EVENTLISTENERS
@@ -56,19 +69,24 @@ const processingStatus = document.querySelector('#file-process-progress');
 const processingRowsNo = document.querySelector('#file-process-rows');
 const processingCellsNo = document.querySelector('#file-process-cells');
 
+const processingRowNoWrapper = document.querySelector('#file-process-rows-wrap')
+const processingCellsNoWrapper = document.querySelector('#file-process-cells-wrap')
+
+const defaultProcessButton = processFileButton.innerHTML;
 const defaultProcessingStatus = processingStatus.innerHTML;
 const defaultProcessingRowsNo = processingRowsNo.innerHTML;
 const defaultProcessingCellsNo = processingCellsNo.innerHTML;
 
+let isFileLoaded = false;
 let downloadsMap;
 
 function readXlsx() {
-  if (!processedFile) {
+  if (!isFileSelected) {
     alert('Please load .xlsx file first');
     return;
   }
+
   var reader = new FileReader();
-  // required by excel
   let totalRows =  0;
   let totalCells =  0;
 
@@ -76,6 +94,10 @@ function readXlsx() {
   reader.onloadstart = function() {
     resetProcessingInfo();
     resetDownloadingInfo();
+
+    isFileLoaded = false;
+
+    processFileButton.innerHTML = "Loading..."
     processingStatus.innerHTML = "Started processing";
   };
   // INFORM ABOUT PROGRESS:
@@ -114,10 +136,17 @@ function readXlsx() {
     downloadsMap = rowDataMap;
     window.electronAPI.send('map-toMain', rowDataMap);
 
+    processFileButton.innerHTML = defaultProcessButton;
     processingStatus.innerHTML = "File loaded:";
     processingRowsNo.innerHTML = totalRows;
+    processingRowNoWrapper.classList.remove('hidden');
     processingCellsNo.innerHTML = totalCells;
+    processingCellsNoWrapper.classList.remove('hidden');
+
+    downloadStatus.innerHTML = "Ready to download"
   }
+
+  isFileLoaded = true;
 
   reader.readAsArrayBuffer(processedFile);
 }
@@ -125,7 +154,9 @@ function readXlsx() {
 function resetProcessingInfo() {
   processingStatus.innerHTML = defaultProcessingStatus;
   processingRowsNo.innerHTML = defaultProcessingRowsNo;
+  processingRowNoWrapper.classList.add('hidden');
   processingCellsNo.innerHTML = defaultProcessingCellsNo;
+  processingCellsNoWrapper.classList.add('hidden');
 }
 
 // ADD EVENT LISTENER
@@ -140,13 +171,30 @@ const downloadButton = document.querySelector('#btn-download');
 const downloadStatus = document.querySelector('#download-progress');
 const downloadSuccessNo = document.querySelector('#download-success-no');
 const downloadFailsNo = document.querySelector('#download-fails-no');
+const downloadFailsList = document.querySelector('#download-fails-list');
+
+const downloadSuccessNoWrapper = document.querySelector('#download-success-no-wrap');
+const downloadFailsNoWrapper = document.querySelector('#download-fails-no-wrap');
 
 const defaultDownloadStatus = downloadStatus.innerHTML;
 const defaultDownloadSuccessNo = downloadSuccessNo.innerHTML;
 const defaultDownloadFailsNo = downloadFailsNo.innerHTML;
 
+let isDownloading = false;
+
 function startDownloading() {
+  if (!isFileSelected) {
+    alert('Please select and process .xlsx file first');
+    return;
+  }
+  if (!isFileLoaded) {
+    alert('Please process .xlsx file first');
+    return;
+  }
+
+  if (isDownloading) return;
   // TODO: ADD CHECK IF FILE HAS BEEN LOADED
+  isDownloading = true;
   resetDownloadingInfo();
 
   downloadButton.innerHTML = 'Downloading...';
@@ -158,16 +206,36 @@ function downloadingFinished(response) {
   console.log(response);
   
   downloadButton.innerHTML = 'Download';
-  if (response[0] !== undefined) downloadStatus.innerHTML = response[0];
-  if (response[1] !== undefined) downloadSuccessNo.innerHTML = response[1];
-  if (response[2] !== undefined) downloadFailsNo.innerHTML = response[2];
-  if (response[3] !== undefined) console.log(response[3]); // TODO ADD FAILS LIST
+  if (response[0] !== undefined) {
+    downloadStatus.innerHTML = response[0];
+  }
+  if (response[1] !== undefined) {
+    downloadSuccessNo.innerHTML = response[1];
+    downloadSuccessNoWrapper.classList.remove('hidden');
+  }
+  if (response[2] !== undefined) {
+    downloadFailsNo.innerHTML = response[2];
+    downloadFailsNoWrapper.classList.remove('hidden');
+  }
+  if (response[3] !== undefined && response[3].length !== 0) {
+    downloadFailsList.innerHTML = response[3];
+    downloadFailsList.classList.remove('hidden');
+  }
+
+  isDownloading = false;
 }
 
 function resetDownloadingInfo() {
   downloadStatus.innerHTML = defaultDownloadStatus;
+
   downloadSuccessNo.innerHTML = defaultDownloadSuccessNo;
+  downloadSuccessNoWrapper.classList.add('hidden');
+
   downloadFailsNo.innerHTML = defaultDownloadFailsNo;
+  downloadFailsNoWrapper.classList.add('hidden');
+
+  downloadFailsList.innerHTML = "";
+  downloadFailsList.classList.add('hidden');
 }
 
 // ADD EVENT LISTENERS
