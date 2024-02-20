@@ -47,6 +47,7 @@ strong {
   INDIVIDUAL RULES
 */
 .file-selector {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -88,14 +89,24 @@ strong {
 }
 
 
-.current-file-data {
+#xlsx-file-input {
+  position: absolute;
+  top:0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+
+  cursor: pointer;
+}
+
+.current-file {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 1rem;
   justify-content: center;
   align-items: center;
 
-  width: 16rem;
+  width: 24rem;
 
   padding: 0.75rem 0.5rem;
   margin: 0.75rem auto;
@@ -103,6 +114,101 @@ strong {
   color: var(--color-black-resin);
 }
 
+
+#btn-file-process {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 10rem;
+  
+  padding: 1rem 1rem;
+  margin: 0 auto;
+
+  background-color: var(--color-white);
+  color: var(--color-grey);
+
+  border-width: 1px;
+  border-radius: 0.5rem;
+  
+  box-shadow: 0.3rem 0.3rem 1rem var(--color-black-resin);
+
+  cursor: pointer;
+
+  /* TODO: Move this to a higher element and inherit */
+  letter-spacing: 0.025em;
+
+  transition-duration: 200ms;
+}
+#btn-file-process:hover {
+  color: var(--color-teal);
+  box-shadow: 0.3rem 0.3rem 0.5rem var(--color-black-resin);
+}
+#btn-file-process:active {
+  background-color: rgb(230, 230, 230);
+  box-shadow: 0 0 0.25rem var(--color-black-resin);
+}
+
+.file-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+
+  width: 16em;
+
+  padding: 0.75rem 0.5rem;
+  margin: 0.75rem auto;
+
+  color: var(--color-black-resin);
+}
+
+#file-process-progress {
+  font-weight: bold;
+}
+
+#file-process-rows,
+#file-process-cells {
+  align-self: start;
+}
+
+
+#btn-download {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 10rem;
+  
+  padding: 1rem 1rem;
+  margin: 0 auto;
+
+  background-color: var(--color-white);
+  color: var(--color-grey);
+
+  border-width: 1px;
+  border-radius: 0.5rem;
+  
+  box-shadow: 0.3rem 0.3rem 1rem var(--color-black-resin);
+
+  cursor: pointer;
+
+  /* TODO: Move this to a higher element and inherit */
+  letter-spacing: 0.025em;
+
+  transition-duration: 200ms;
+}
+#btn-download:hover {
+  color: var(--color-teal);
+  box-shadow: 0.3rem 0.3rem 0.5rem var(--color-black-resin);
+}
+#btn-download:active {
+  background-color: rgb(230, 230, 230);
+  box-shadow: 0 0 0.25rem var(--color-black-resin);
+}
 
 /*
 ! tailwindcss v3.1.8 | MIT License | https://tailwindcss.com

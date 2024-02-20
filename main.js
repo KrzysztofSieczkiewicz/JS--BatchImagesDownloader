@@ -1,5 +1,5 @@
 const path = require('path')
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 
 const isDev = process.env.NODE_ENV !== 'development'
 const isMac = process.platform === 'darwin';
@@ -11,6 +11,11 @@ function createMainWindow() {
       title: 'Batch image downloader',
       width: isDev ? 1000 : 500,
       height: 600,
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.js'),
+        contextIsolation: true,
+        enableRemoteModule: false
+      }
     });
 
   const appMenu = Menu.buildFromTemplate(menu);
@@ -50,7 +55,13 @@ app.whenReady().then( () => {
       app.quit();
     }
   })
+})
 
+app.on('ready', () => {
+  ipcMain.on('map-toMain', (event, arg) => {
+      console.log('Received message on get-map:', arg);
+      // Handle the message
+  });
 })
 
 // Top bar menu template
