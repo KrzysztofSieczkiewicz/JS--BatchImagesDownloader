@@ -122,6 +122,8 @@ function readXlsx() {
     workbook.eachSheet((worksheet) => {
       worksheet.eachRow((row, rowNumber) => {
 
+        if (rowNumber ===  1) return;
+
         const key = row.getCell(1).value;
         const values = [];
         totalRows++;
@@ -136,8 +138,6 @@ function readXlsx() {
         rowDataMap.set(key, values);
       });
     });
-    // REMOVE FIRST ROW TO SKIP HEADERS
-    rowDataMap.delete(rowDataMap.keys().next().value);
 
     // SAVE MAP AND SEND IT TO MAIN.JS
     downloadsMap = rowDataMap;
