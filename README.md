@@ -1,9 +1,9 @@
-Application serves to download images based on .xlsx file input.
+Based on JS electron. Application serves to download images based on .xlsx file input.
 
 File setup:
 .xlsx file should contain header row. 
-First column should contain unique indentifiers (downloaded files will be named using first cell of each column and numerical suffixes if there are more than one image per row).
-Any other cell in a row is treated as url to perform download (invalid entries will be listed as failures).
+First column should contain unique indentifiers (downloaded files will be named using row identifier and numerical suffix if there are more than one image per row).
+Any other cell in a row is assumed as url (invalid entries will be listed as download failures).
 
 How to use:
 1. Select .xlsx file from Your disk
