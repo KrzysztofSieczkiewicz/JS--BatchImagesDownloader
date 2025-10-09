@@ -1,9 +1,9 @@
 Based on JS electron. Application serves to download images based on .xlsx file input.
 
 File setup:
-.xlsx file should contain header row. 
+Input file should contain header row. 
 First column should contain unique indentifiers (downloaded files will be named using row identifier and numerical suffix if there are more than one image per row).
-Any other cell in a row is assumed to be an URL (invalid entries will be listed as download failures, but will not break batch download).
+Any other cell in a row is assumed to be an URL (invalid entries will be listed as download failures, but will not interrupt batch download).
 
 How to use:
 1. Select .xlsx file from Your disk
@@ -12,8 +12,8 @@ How to use:
 4. After finishing information on success/failures will show and eventual list of failed downloads will be displayed.
 
 How to run:
-1. Running command 'npm run start'
-2. Running command 'npx electronmon .' will allow for live updates
+1. Command 'npm run start'
+2. Command 'npx electronmon .'  (allows for live updates)
 3. Packaging via 'npm run dist -- --x64' will create working installer for win x64 (other systems might require package.json alteration)
-   Command will create dist directory in which You ready application and installer can be found
+   Command will create dist directory in which application and installer can be found
    Might require running with admin permissions
